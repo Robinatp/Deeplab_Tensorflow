@@ -33,12 +33,12 @@ import csv
 FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_string('original_color_folder',
-                           './battery_word_seg/JPEGImages',
+                           "/home/robin/Dataset/VOC/VOC2012_VOCtrainval/VOC2012/JPEGImages",
                            'Original ground truth annotations.')
 
-tf.app.flags.DEFINE_string('original_gt_folder',
-                           './battery_word_seg/SegmentationClassRaw',
-                           'Original ground truth annotations.')
+tf.app.flags.DEFINE_string('semantic_segmentation_folder',
+                           "/home/robin/Dataset/VOC/VOC2012_VOCtrainval/VOC2012/SegmentationClassRaw",
+                           'Folder containing semantic segmentation annotations.')
 
 tf.app.flags.DEFINE_string('segmentation_format', 'png', 'Segmentation format.')
 
@@ -74,7 +74,7 @@ def _save_annotation(annotation, filename):
 
 def vis_segmentation(image, seg_map):
   """Visualizes input image, segmentation map and overlay view."""
-  plt.figure(figsize=(15, 5))
+  plt.figure(figsize=(16, 8))
   grid_spec = gridspec.GridSpec(1, 4, width_ratios=[6, 6, 6, 1])
 
   plt.subplot(grid_spec[0])
@@ -104,7 +104,7 @@ def main(unused_argv):
     
   if(FLAGS.convert):
 
-    annotations = glob.glob(os.path.join(FLAGS.original_gt_folder,
+    annotations = glob.glob(os.path.join(FLAGS.semantic_segmentation_folder,
                                        '*.' + FLAGS.segmentation_format))
     
     
@@ -112,19 +112,29 @@ def main(unused_argv):
     
     for annotation in annotations:
         print(annotation)
-        #filename = os.path.join(FLAGS.segmentation_output_dir,os.path.basename(annotation)[:-4]+".jpg")
+        
         
         ori_filename = os.path.join(FLAGS.original_color_folder,os.path.basename(annotation)[:-4]+".jpg")
         print(ori_filename)
 #         ori_im =Image.open(ori_filename)
-        orignal_im = cv2.imread(ori_filename)
-        image_RGB = cv2.cvtColor(orignal_im,cv2.COLOR_BGR2RGB)
+        color_im = cv2.imread(ori_filename)
+        rgb_image = cv2.cvtColor(color_im,cv2.COLOR_BGR2RGB)
+        print(rgb_image.shape)
          
-        mask_im = cv2.imread(annotation)
-        print(mask_im.shape)
-        mask_RGB = cv2.cvtColor(mask_im,cv2.COLOR_BGR2RGB)
+        seg_im = cv2.imread(annotation,0)
+        print(seg_im.shape)
+        
+        #dst = src1 * alpha + src2 * beta + gamma;
+        #alpha,beta,gamma
+#         alpha = 0.3
+#         beta = 1-alpha
+#         gamma = 0
+#         img_add = cv2.addWeighted(rgb_image, alpha, seg_im, beta, gamma)
+#         cv2.imshow("image_add",img_add)
+#         cv2.waitKey(0)
+        
          
-        vis_segmentation(orignal_im,mask_RGB)
+        vis_segmentation(rgb_image,seg_im*125)
 
 
 if __name__ == '__main__':
